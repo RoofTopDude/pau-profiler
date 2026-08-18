@@ -1,56 +1,88 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://pau.dev/schema/pau-trace-0.1.json",
-  "title": "PAU Trace 0.1",
+  "$id": "https://rooftopdude.github.io/pau-profiler/schema/pau-trace-0.2.json",
+  "title": "PAU Context Trace 0.2",
+  "description": "Input trace for transparent context accounting with Pig Adjustable Units.",
   "type": "object",
   "required": ["version", "segments"],
-  "additionalProperties": true,
   "properties": {
-    "version": {"type": "string"},
-    "runId": {"type": "string"},
-    "model": {"type": "string"},
-    "provider": {"type": "string"},
-    "contextWindow": {"type": "number", "exclusiveMinimum": 0},
-    "turn": {"type": "integer", "minimum": 0},
-    "analysisMode": {"enum": ["basic", "heuristic"]},
-    "metadata": {"type": "object"},
+    "version": {
+      "type": "string",
+      "description": "Trace contract version. The reference implementation accepts 0.1, 0.2, and forward-compatible strings."
+    },
+    "runId": { "type": "string" },
+    "model": { "type": "string" },
+    "provider": { "type": "string" },
+    "tokenizer": { "type": "string" },
+    "traceBoundary": {
+      "type": "string",
+      "description": "What the trace represents, for example final-provider-payload or pre-compaction-context."
+    },
+    "contextWindow": { "type": "number", "exclusiveMinimum": 0 },
+    "turn": { "type": "integer", "minimum": 0 },
+    "analysisMode": { "enum": ["basic", "heuristic"] },
+    "metadata": { "$ref": "#/$defs/metadata" },
     "segments": {
       "type": "array",
-      "items": {"$ref": "#/$defs/segment"}
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/segment" }
     }
   },
+  "additionalProperties": true,
   "$defs": {
+    "metadataValue": {
+      "type": ["string", "number", "boolean", "null"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/metadataValue" }
+    },
     "segment": {
       "type": "object",
       "required": ["id", "type"],
-      "additionalProperties": true,
-      "anyOf": [
-        {"required": ["tokens"]},
-        {"required": ["content"]}
-      ],
       "properties": {
-        "id": {"type": "string", "minLength": 1},
+        "id": { "type": "string", "minLength": 1 },
         "type": {
           "enum": [
-            "system", "developer", "user", "history", "tool", "workspace",
-            "rag", "browser", "memory", "code", "data", "summary", "other"
+            "system",
+            "developer",
+            "user",
+            "history",
+            "tool",
+            "workspace",
+            "rag",
+            "browser",
+            "memory",
+            "code",
+            "data",
+            "summary",
+            "other"
           ]
         },
-        "source": {"type": "string"},
-        "content": {"type": "string"},
-        "contentHash": {"type": "string"},
-        "tokens": {"type": "number", "minimum": 0},
-        "turnAdded": {"type": "integer", "minimum": 0},
-        "turnLastSeen": {"type": "integer", "minimum": 0},
-        "replayCount": {"type": "number", "minimum": 0},
-        "duplicateRatio": {"type": "number", "minimum": 0, "maximum": 1},
-        "relevance": {"type": "number", "minimum": 0},
-        "density": {"type": "number", "minimum": 0},
-        "authority": {"type": "number", "minimum": 0},
-        "utility": {"type": "number", "minimum": 0, "maximum": 1},
-        "protected": {"type": "boolean"},
-        "metadata": {"type": "object"}
-      }
+        "source": { "type": "string" },
+        "content": { "type": "string" },
+        "contentHash": { "type": "string" },
+        "tokens": { "type": "number", "minimum": 0 },
+        "turnAdded": { "type": "integer", "minimum": 0 },
+        "turnLastSeen": { "type": "integer", "minimum": 0 },
+        "replayCount": { "type": "integer", "minimum": 0 },
+        "duplicateRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "relevance": { "type": "number", "minimum": 0 },
+        "density": { "type": "number", "minimum": 0 },
+        "authority": { "type": "number", "minimum": 0 },
+        "utility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "protected": { "type": "boolean" },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            { "required": ["tokens"] },
+            { "required": ["content"] }
+          ]
+        }
+      ],
+      "additionalProperties": true
     }
   }
 }

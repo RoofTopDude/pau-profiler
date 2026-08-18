@@ -1,0 +1,31 @@
+{
+  "model": "example-model",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a production agent. Follow policy, preserve user intent, and report material uncertainty."
+    },
+    {
+      "role": "developer",
+      "content": "Use repository tools selectively. Do not inject whole repositories when symbol-level retrieval is sufficient."
+    },
+    {
+      "role": "user",
+      "content": "Review the agent harness and find unnecessary context growth."
+    },
+    {
+      "role": "assistant",
+      "content": "I will inspect the final request composition and tool replay behavior."
+    },
+    {
+      "role": "tool",
+      "name": "repository_tree",
+      "tool_call_id": "call_1",
+      "content": "src/index.ts\nsrc/agent.ts\nsrc/context.ts\nsrc/tools.ts\nsrc/provider.ts"
+    },
+    {
+      "role": "user",
+      "content": "Focus on duplicated tool output and context carried across turns."
+    }
+  ]
+}
