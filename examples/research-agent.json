@@ -1,0 +1,72 @@
+{
+  "version": "0.1",
+  "runId": "research-agent-run-0421",
+  "provider": "example-provider",
+  "model": "example-model",
+  "contextWindow": 128000,
+  "turn": 24,
+  "analysisMode": "heuristic",
+  "segments": [
+    {
+      "id": "system.core",
+      "type": "system",
+      "tokens": 8201,
+      "relevance": 1.0,
+      "density": 1.05,
+      "authority": 1.0,
+      "utility": 0.96,
+      "protected": true
+    },
+    {
+      "id": "user.current",
+      "type": "user",
+      "tokens": 4002,
+      "relevance": 1.0,
+      "density": 1.0,
+      "authority": 1.0,
+      "utility": 0.98,
+      "protected": true
+    },
+    {
+      "id": "history.turns-1-17",
+      "type": "history",
+      "tokens": 11291,
+      "relevance": 0.58,
+      "density": 0.8,
+      "authority": 1.0,
+      "utility": 0.45,
+      "replayCount": 3
+    },
+    {
+      "id": "tool.github.repository-dump",
+      "type": "tool",
+      "source": "github",
+      "tokens": 18420,
+      "relevance": 0.28,
+      "density": 0.72,
+      "authority": 1.0,
+      "utility": 0.12,
+      "duplicateRatio": 0.44,
+      "replayCount": 4
+    },
+    {
+      "id": "rag.architecture-docs",
+      "type": "rag",
+      "tokens": 12578,
+      "relevance": 0.77,
+      "density": 1.12,
+      "authority": 1.0,
+      "utility": 0.73,
+      "replayCount": 1
+    },
+    {
+      "id": "code.agent-config",
+      "type": "code",
+      "tokens": 7000,
+      "relevance": 0.82,
+      "density": 1.2,
+      "authority": 1.0,
+      "utility": 0.76
+    }
+  ]
+}
