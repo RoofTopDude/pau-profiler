@@ -1,0 +1,72 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "src/**"
+      - "scripts/build-site.mjs"
+      - "package.json"
+      - "tsconfig.json"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let an in-flight deploy finish rather than cancelling it midway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build library and site
+        run: npm run build:site
+
+      - name: Verify the profiler bundle is complete
+        # The site is useless without the compiled library: app.js imports ./lib/index.js,
+        # and a missing lib/ leaves the page rendering with a dead profiler. That is exactly
+        # how the previous hand-published site broke, so it is checked here rather than trusted.
+        run: |
+          test -f site-dist/index.html
+          test -f site-dist/lib/index.js
+          test -f site-dist/pau-logo.png
+          test -f site-dist/.nojekyll
+          grep -q "lib/index.js" site-dist/app.js
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site-dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
