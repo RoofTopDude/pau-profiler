@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pau.dev/schema/pau-trace-0.1.json",
+  "title": "PAU Trace 0.1",
+  "type": "object",
+  "required": ["version", "segments"],
+  "additionalProperties": true,
+  "properties": {
+    "version": {"type": "string"},
+    "runId": {"type": "string"},
+    "model": {"type": "string"},
+    "provider": {"type": "string"},
+    "contextWindow": {"type": "number", "exclusiveMinimum": 0},
+    "turn": {"type": "integer", "minimum": 0},
+    "analysisMode": {"enum": ["basic", "heuristic"]},
+    "metadata": {"type": "object"},
+    "segments": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/segment"}
+    }
+  },
+  "$defs": {
+    "segment": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": true,
+      "anyOf": [
+        {"required": ["tokens"]},
+        {"required": ["content"]}
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {
+          "enum": [
+            "system", "developer", "user", "history", "tool", "workspace",
+            "rag", "browser", "memory", "code", "data", "summary", "other"
+          ]
+        },
+        "source": {"type": "string"},
+        "content": {"type": "string"},
+        "contentHash": {"type": "string"},
+        "tokens": {"type": "number", "minimum": 0},
+        "turnAdded": {"type": "integer", "minimum": 0},
+        "turnLastSeen": {"type": "integer", "minimum": 0},
+        "replayCount": {"type": "number", "minimum": 0},
+        "duplicateRatio": {"type": "number", "minimum": 0, "maximum": 1},
+        "relevance": {"type": "number", "minimum": 0},
+        "density": {"type": "number", "minimum": 0},
+        "authority": {"type": "number", "minimum": 0},
+        "utility": {"type": "number", "minimum": 0, "maximum": 1},
+        "protected": {"type": "boolean"},
+        "metadata": {"type": "object"}
+      }
+    }
+  }
+}
