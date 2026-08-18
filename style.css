@@ -1,3 +1,20 @@
 @import url("./base.css");
 @import url("./profiler.css");
 @import url("./responsive.css");
+
+/* PAU brand mark — Context Pig */
+.pau-brand-mark {
+  width: 40px !important;
+  height: 40px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(139, 92, 246, 0.34) !important;
+  border-radius: 11px !important;
+  background: #09090b url("./pau-logo.png") center / cover no-repeat !important;
+  box-shadow: inset 0 0 18px rgba(139, 92, 246, 0.08), 0 0 0 1px rgba(96, 165, 250, 0.05) !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+.pau-brand-mark svg,
+.pau-brand-mark img {
+  display: none !important;
+}
