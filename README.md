@@ -1,10 +1,14 @@
-# PAU Profiler
+<div align="center">
+
+<img src="site/pau-lockup.png" alt="PAU Profiler" width="420">
 
 [![CI](https://github.com/RoofTopDude/pau-profiler/actions/workflows/ci.yml/badge.svg)](https://github.com/RoofTopDude/pau-profiler/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 [![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
 [![Spec](https://img.shields.io/badge/spec-PAU%20Core%200.3-8b5cf6.svg)](spec/PAU-SPEC.md)
+
+</div>
 
 **Pig Adjustable Units (PAU)** is a local-first, open-source context utilization profiler for AI agents and LLM applications.
 

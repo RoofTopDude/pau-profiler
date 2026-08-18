@@ -64,4 +64,5 @@
 @media (max-width: 640px) {
   .header-inner { min-height: 68px; }
   .brand-mark { width: 66px; height: 66px; flex-basis: 66px; margin: -8px 0; }
+  .footer-lockup { height: 70px; }
 }

@@ -39,18 +39,10 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build library and site
+        # build-site.mjs verifies the compiled library is present and that every asset
+        # index.html references actually exists, exiting non-zero if not. That is the check
+        # the previously hand-published site never had, which is why it shipped without lib/.
         run: npm run build:site
-
-      - name: Verify the profiler bundle is complete
-        # The site is useless without the compiled library: app.js imports ./lib/index.js,
-        # and a missing lib/ leaves the page rendering with a dead profiler. That is exactly
-        # how the previous hand-published site broke, so it is checked here rather than trusted.
-        run: |
-          test -f site-dist/index.html
-          test -f site-dist/lib/index.js
-          test -f site-dist/pau-logo.png
-          test -f site-dist/.nojekyll
-          grep -q "lib/index.js" site-dist/app.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
