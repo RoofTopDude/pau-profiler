@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PAU Profiler is a local-first context utilization analyzer for AI agents and harnesses.">
+  <meta name="theme-color" content="#09090b">
+  <title>PAU Profiler - Context intelligence for agent systems</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="#top" aria-label="PAU Profiler home">
+          <span class="brand-mark" aria-hidden="true"><span>P</span></span>
+          <span class="brand-copy"><strong>PAU</strong><small>PROFILER</small></span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#profiler">Profiler</a>
+          <a href="#method">Method</a>
+          <a href="#integration">Integration</a>
+          <a href="https://github.com/RoofTopDude/pau-profiler">GitHub</a>
+        </nav>
+        <a class="button button-quiet header-cta" href="#profiler">Analyze a trace <span aria-hidden="true">&#8595;</span></a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div class="hero-copy reveal">
+            <p class="eyebrow"><span class="signal-dot"></span> Context intelligence for agent systems</p>
+            <h1>See the context.<br><em>Fix the harness.</em></h1>
+            <p class="hero-lede">PAU turns an opaque token total into a traceable account of load, replay, duplication, retention, utility, and context-hog pressure.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#profiler">Run the profiler <span aria-hidden="true">&#8594;</span></a>
+              <a class="button button-quiet" href="https://github.com/RoofTopDude/pau-profiler">View source</a>
+            </div>
+            <dl class="hero-metrics">
+              <div><dt>Execution</dt><dd>Browser-local</dd></div>
+              <div><dt>Input</dt><dd>Trace or messages</dd></div>
+              <div><dt>Output</dt><dd>Context receipt</dd></div>
+              <div><dt>Control</dt><dd>Protected by policy</dd></div>
+            </dl>
+          </div>
+
+          <div class="hero-instrument reveal" aria-label="Example PAU instrument panel">
+            <div class="instrument-topbar">
+              <div><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span></div>
+              <span>RUN / agent-turn-42</span>
+              <span class="status-chip"><span class="signal-dot"></span> LOCAL</span>
+            </div>
+            <div class="instrument-body">
+              <div class="instrument-heading">
+                <div>
+                  <p>PAU CONTEXT RECEIPT</p>
+                  <h2>72<span>/100</span></h2>
+                  <small>Context health</small>
+                </div>
+                <div class="instrument-ring" aria-hidden="true"><span>68%</span></div>
+              </div>
+              <div class="instrument-kpis">
+                <div><small>PHYSICAL</small><strong>61.5k</strong><span>tokens</span></div>
+                <div><small>ADJUSTED</small><strong>74.8k</strong><span>PAU</span></div>
+                <div><small>REPLAY</small><strong>21%</strong><span>overhead</span></div>
+              </div>
+              <div class="mini-context" aria-label="Example context composition">
+                <span class="cat-system" style="--size:13" title="System"></span>
+                <span class="cat-user" style="--size:5" title="User"></span>
+                <span class="cat-history" style="--size:18" title="History"></span>
+                <span class="cat-rag" style="--size:21" title="RAG"></span>
+                <span class="cat-tool is-hog" style="--size:34" title="Tool output - context hog"></span>
+                <span class="cat-code" style="--size:9" title="Code"></span>
+              </div>
+              <div class="instrument-row">
+                <span><b>01</b> github.repository_dump</span>
+                <span class="severity severe">8.7</span>
+              </div>
+              <div class="instrument-row">
+                <span><b>02</b> conversation.history</span>
+                <span class="severity medium">5.4</span>
+              </div>
+              <div class="instrument-row safe">
+                <span><b>03</b> system.instructions</span>
+                <span class="severity low">1.8</span>
+              </div>
+              <p class="instrument-note"><span>Recommendation</span> Replace full repository replay with targeted symbol retrieval.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="signal-band" aria-label="PAU capabilities">
+        <div class="wrap signal-grid">
+          <div><span>01</span><strong>Measure</strong><small>Tokens, PAU, density, utility</small></div>
+          <div><span>02</span><strong>Attribute</strong><small>Source, category, lifetime, replay</small></div>
+          <div><span>03</span><strong>Diagnose</strong><small>Hogs, waste, regressions, drift</small></div>
+          <div><span>04</span><strong>Optimize</strong><small>Deduplicate, summarize, retrieve</small></div>
+        </div>
+      </section>
+
+      <section class="profiler-section" id="profiler">
+        <div class="wrap">
+          <div class="section-heading split-heading">
+            <div>
+              <p class="eyebrow"><span class="signal-dot"></span> Interactive profiler</p>
+              <h2>Put the actual payload<br><em>under instrumentation.</em></h2>
+            </div>
+            <p>Paste a PAU trace, an OpenAI-style message array, or an Anthropic request. Analysis runs in this browser; the payload is not sent to a scoring service.</p>
+          </div>
+
+          <div class="workbench" data-workbench>
+            <div class="workbench-bar">
+              <div class="segmented" role="tablist" aria-label="Analysis mode">
+                <button type="button" class="is-active" role="tab" aria-selected="true" data-mode="single">Single run</button>
+                <button type="button" role="tab" aria-selected="false" data-mode="compare">Compare runs</button>
+              </div>
+              <div class="workbench-status"><span class="signal-dot"></span> No network calls</div>
+            </div>
+
+            <div class="workbench-grid">
+              <aside class="control-rail">
+                <div class="control-group">
+                  <label for="profile-select">Measurement profile</label>
+                  <select id="profile-select">
+                    <option value="heuristic">Core heuristic</option>
+                    <option value="basic">Core deterministic</option>
+                    <option value="coding">Coding agent</option>
+                    <option value="rag">RAG agent</option>
+                    <option value="browser">Browser agent</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="policy-select">Optimization policy</label>
+                  <select id="policy-select">
+                    <option value="conservative">Conservative</option>
+                    <option value="balanced" selected>Balanced</option>
+                    <option value="aggressive">Aggressive</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="context-window">Context window</label>
+                  <div class="input-suffix"><input id="context-window" type="number" min="1" step="1000" value="128000"><span>tokens</span></div>
+                </div>
+                <label class="check-row"><input id="near-duplicates" type="checkbox" checked><span>Near-duplicate detection</span></label>
+                <div class="rail-actions">
+                  <button class="button button-primary" id="analyze-button" type="button">Analyze context</button>
+                  <button class="button button-quiet" id="sample-button" type="button">Load sample</button>
+                  <label class="button button-quiet file-button">Import JSON<input id="file-input" type="file" accept="application/json,.json"></label>
+                </div>
+                <div class="privacy-card">
+                  <strong>LOCAL-FIRST</strong>
+                  <p>Source text stays in memory in this page. Downloaded receipts contain the analysis you choose to export.</p>
+                </div>
+              </aside>
+
+              <div class="editor-column">
+                <div class="editor-panel">
+                  <div class="panel-label"><span>INPUT A</span><small data-input-label>Trace or message payload</small></div>
+                  <textarea id="trace-input" spellcheck="false" aria-label="PAU trace JSON"></textarea>
+                </div>
+                <div class="editor-panel candidate-panel" id="candidate-panel" hidden>
+                  <div class="panel-label"><span>INPUT B</span><small>Candidate trace</small></div>
+                  <textarea id="candidate-input" spellcheck="false" aria-label="Candidate PAU trace JSON"></textarea>
+                </div>
+                <p class="editor-error" id="editor-error" role="alert" hidden></p>
+              </div>
+            </div>
+
+            <div class="results" id="results" aria-live="polite">
+              <div class="results-empty">
+                <span class="empty-mark">P</span>
+                <h3>Ready to profile</h3>
+                <p>Load the reference trace or paste a harness payload, then run the analysis.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="method-section" id="method">
+        <div class="wrap method-grid">
+          <div class="method-copy">
+            <p class="eyebrow"><span class="signal-dot"></span> Transparent by construction</p>
+            <h2>One score is not<br><em>the measurement.</em></h2>
+            <p>PAU keeps physical occupancy, weighted load, utility, replay, duplication, and policy protection separate. Every factor survives into the receipt.</p>
+            <pre><code>PAU_i = tokens_i
+      x baseWeight_i
+      x relevance_i
+      x density_i
+      x authority_i</code></pre>
+          </div>
+          <div class="method-stack">
+            <article>
+              <span>01 / PHYSICAL</span>
+              <h3>What is in the window?</h3>
+              <p>Exact or estimated tokens, category share, source attribution, and declared context-window utilization.</p>
+            </article>
+            <article>
+              <span>02 / STRUCTURAL</span>
+              <h3>What keeps accumulating?</h3>
+              <p>Exact and near duplication, turn lifetime, replay count, replay PAU, and retention tax.</p>
+            </article>
+            <article>
+              <span>03 / UTILITY</span>
+              <h3>What earns its keep?</h3>
+              <p>Provided, heuristic, or experimentally calibrated utility remains explicitly labeled.</p>
+            </article>
+            <article>
+              <span>04 / CONTROL</span>
+              <h3>What may be changed?</h3>
+              <p>Protected context is observable but excluded from automated optimization candidates.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="integration-section" id="integration">
+        <div class="wrap">
+          <div class="section-heading split-heading">
+            <div>
+              <p class="eyebrow"><span class="signal-dot"></span> Harness integration</p>
+              <h2>Instrument the boundary.<br><em>Not the transcript.</em></h2>
+            </div>
+            <p>Run PAU immediately before the provider call so the receipt describes the payload the model actually receives.</p>
+          </div>
+          <div class="integration-grid">
+            <div class="flow-panel">
+              <div><span>01</span><strong>Agent state</strong><small>history, memory, plan</small></div>
+              <i aria-hidden="true">&#8594;</i>
+              <div><span>02</span><strong>Context assembly</strong><small>tools, RAG, workspace</small></div>
+              <i aria-hidden="true">&#8594;</i>
+              <div class="active"><span>03</span><strong>PAU receipt</strong><small>measure and gate</small></div>
+              <i aria-hidden="true">&#8594;</i>
+              <div><span>04</span><strong>Provider</strong><small>actual model payload</small></div>
+            </div>
+            <div class="code-panel">
+              <div class="code-head"><span>TypeScript</span><button type="button" data-copy-code>Copy</button></div>
+              <pre><code id="integration-code">import {
+  normalizeTrace,
+  analyzeTrace,
+  buildOptimizationPlan
+} from "pau-profiler";
+
+const trace = normalizeTrace(modelPayload, {
+  contextWindow: 128_000,
+  model: selectedModel
+});
+
+const receipt = analyzeTrace(trace);
+const plan = buildOptimizationPlan(receipt, "balanced");
+
+runtime.emit("context.receipt", receipt);</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing-section">
+        <div class="wrap closing-panel">
+          <div>
+            <p class="eyebrow"><span class="signal-dot"></span> Open measurement</p>
+            <h2>Make context spending<br><em>visible enough to govern.</em></h2>
+          </div>
+          <div>
+            <p>The package, formulas, profiles, schemas, tests, and website are in one public repository.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="https://github.com/RoofTopDude/pau-profiler">Open the repository</a>
+              <a class="button button-quiet" href="https://github.com/RoofTopDude/pau-profiler/blob/main/spec/PAU-SPEC.md">Read the specification</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div class="brand footer-brand"><span class="brand-mark"><span>P</span></span><span class="brand-copy"><strong>PAU</strong><small>PROFILER</small></span></div>
+        <p>Context utilization accounting for agent systems. Open source under MIT.</p>
+        <div><a href="https://github.com/RoofTopDude/pau-profiler">Source</a><a href="https://github.com/RoofTopDude/pau-profiler/blob/main/spec/PAU-SPEC.md">Spec</a><a href="#top">Top</a></div>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
