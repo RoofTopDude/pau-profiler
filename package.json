@@ -1,0 +1,28 @@
+{
+  "name": "pau-profiler",
+  "version": "0.1.0",
+  "description": "Transparent context utilization accounting and Context Hog detection using Pig Adjustable Units (PAU).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "pau": "./bin/pau.mjs"
+  },
+  "files": ["dist", "bin", "schema", "spec", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "example": "npm run build && node bin/pau.mjs analyze examples/research-agent.json"
+  },
+  "keywords": ["ai", "agents", "context-window", "observability", "llm", "telemetry", "open-source"],
+  "license": "MIT",
+  "engines": {"node": ">=20"},
+  "devDependencies": {"typescript": "^5.8.3"}
+}
