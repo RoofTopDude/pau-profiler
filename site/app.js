@@ -4,7 +4,9 @@ import {
   compareReceipts,
   getProfile,
   normalizeTrace,
-  profileFor
+  profileFor,
+  renderReceiptMarkdown,
+  validatePAUTrace
 } from "./lib/index.js";
 
 const sampleTrace = {
@@ -52,6 +54,8 @@ const elements = {
   policy: document.querySelector("#policy-select"),
   contextWindow: document.querySelector("#context-window"),
   nearDuplicates: document.querySelector("#near-duplicates"),
+  tolerance: document.querySelector("#eviction-tolerance"),
+  tier: document.querySelector("#tier-select"),
   analyze: document.querySelector("#analyze-button"),
   sample: document.querySelector("#sample-button"),
   file: document.querySelector("#file-input"),
@@ -138,10 +142,30 @@ function analyzePayload(text) {
     analysisMode: profile.mode,
     ...(Number.isFinite(contextWindow) && contextWindow > 0 ? { contextWindow } : {})
   });
+
+  const validation = validatePAUTrace(trace);
+  if (!validation.valid) {
+    const detail = validation.errors.slice(0, 4).map((issue) => `${issue.path}: ${issue.message}`);
+    const extra = validation.errors.length > detail.length
+      ? ` (+${validation.errors.length - detail.length} more)`
+      : "";
+    throw new Error(`Invalid trace. ${detail.join(" | ")}${extra}`);
+  }
+
   return analyzeTrace(trace, {
     profile,
-    nearDuplicates: elements.nearDuplicates.checked
+    nearDuplicates: elements.nearDuplicates.checked,
+    evictionTolerance: selectedTolerance()
   });
+}
+
+function selectedTolerance() {
+  const value = Number(elements.tolerance?.value);
+  return Number.isFinite(value) && value >= 0 && value <= 1 ? value : 0.05;
+}
+
+function selectedTier() {
+  return elements.tier?.value ?? "developer";
 }
 
 function selectedProfile() {
@@ -164,16 +188,20 @@ function renderReceipt(receipt, plan) {
           <h3>${escapeHtml(receipt.runId ?? "Unidentified run")}</h3>
         </div>
         <div class="receipt-actions">
-          <button class="button button-quiet" type="button" data-download>Download receipt</button>
+          <button class="button button-quiet" type="button" data-download>Download JSON</button>
+          <button class="button button-quiet" type="button" data-download-markdown>Download markdown</button>
           <a class="button button-quiet" href="https://github.com/RoofTopDude/pau-profiler/blob/main/spec/PAU-SPEC.md">Explain score</a>
         </div>
       </div>
       <div class="kpi-grid">
         ${kpi("Context health", `${receipt.contextHealthScore}`, "/ 100", "health")}
         ${kpi("Physical context", formatNumber(receipt.totalTokens), "tokens")}
-        ${kpi("Adjusted load", formatNumber(receipt.totalPAU), "PAU")}
+        ${kpi("Adjusted load", formatNumber(receipt.totalPAU), `PAU / ${intervalLabel(receipt.pauInterval)}`)}
         ${kpi("Pig efficiency", formatPercent(receipt.pigEfficiency), "useful load")}
         ${kpi("Replay overhead", formatPercent(receipt.replayOverheadRatio), `${formatNumber(receipt.replayTokens)} tokens`)}
+        ${kpi("Evictable load", formatNumber(receipt.eviction.evictablePAU), `PAU at ${formatPercent(receipt.eviction.tolerance)} tolerance`)}
+        ${kpi("Interaction", receipt.interaction.index.toFixed(2), "CII / dimensionless")}
+        ${kpi("Accounting", receipt.tokenAccountingGrade, "token evidence grade", "grade")}
         ${kpi("Max hog", receipt.maxHogScore.toFixed(1), "/ 10")}
       </div>
       <div class="receipt-grid">
@@ -205,6 +233,42 @@ function renderReceipt(receipt, plan) {
             ${actions.length ? actions.map(planAction).join("") : `<div class="warning-item">No unprotected optimization candidate met the selected policy threshold.</div>`}
           </div>
         </section>
+        <section class="result-panel">
+          <div class="result-panel-head"><strong>Interaction pressure</strong><span>CII ${receipt.interaction.index.toFixed(2)} / not added to PAU</span></div>
+          <div class="category-bars">
+            ${Object.entries(receipt.interaction.components).map(([name, value]) => `
+              <div class="category-row">
+                <label>${escapeHtml(camelToWords(name))}</label>
+                <div class="category-track"><span style="--bar-size:${Math.min(100, value * 100)}%"></span></div>
+                <output>${value.toFixed(2)}</output>
+              </div>`).join("")}
+          </div>
+          <p class="eviction-note">${escapeHtml(receipt.interaction.interpretation)} ${escapeHtml(receipt.interaction.statement)}</p>
+        </section>
+        <section class="result-panel">
+          <div class="result-panel-head"><strong>Governance ledger</strong><span>${formatNumber(receipt.governance.lockedTokens)} tokens locked</span></div>
+          <div class="table-scroll">
+            <table class="hog-table">
+              <thead><tr><th>Segment</th><th>Authority</th><th>Permitted</th></tr></thead>
+              <tbody>${receipt.governance.records.map(governanceRow).join("")}</tbody>
+            </table>
+          </div>
+          <p class="eviction-note">${escapeHtml(receipt.governance.statement)}</p>
+        </section>
+        <section class="result-panel">
+          <div class="result-panel-head"><strong>Evictable load</strong><span>${escapeHtml(receipt.eviction.method)} / ${escapeHtml(receipt.eviction.confidence)} confidence</span></div>
+          <div class="eviction-summary">
+            <div><small>REMOVABLE</small><strong>${formatNumber(receipt.eviction.evictablePAU)}</strong><span>PAU (${formatNumber(receipt.eviction.evictableTokens)} tokens)</span></div>
+            <div><small>PIG EFFICIENCY</small><strong>${formatPercent(receipt.eviction.pigEfficiency)}</strong><span>load that looks necessary</span></div>
+            <div><small>PROTECTED</small><strong>${formatNumber(receipt.eviction.protectedPAUExcluded)}</strong><span>PAU excluded from review</span></div>
+          </div>
+          <div class="plan-list">
+            ${receipt.eviction.segmentIds.length
+              ? receipt.eviction.segmentIds.map((id) => `<div class="eviction-candidate">${escapeHtml(id)}</div>`).join("")
+              : `<div class="warning-item">No candidate fits inside this quality tolerance.</div>`}
+          </div>
+          <p class="eviction-note">Estimated from the declared utility model, not a measured ablation. Confirm with controlled replay before enforcing.</p>
+        </section>
         <section class="result-panel" style="grid-column:1/-1">
           <div class="result-panel-head"><strong>Measurement warnings</strong><span>${receipt.warnings.length} notice(s)</span></div>
           <div class="warning-list">
@@ -215,6 +279,13 @@ function renderReceipt(receipt, plan) {
     </div>`;
 
   elements.results.querySelector("[data-download]")?.addEventListener("click", downloadLastExport);
+  elements.results.querySelector("[data-download-markdown]")?.addEventListener("click", () => {
+    downloadText(
+      renderReceiptMarkdown(receipt, { tier: selectedTier(), plan }),
+      "pau-context-receipt.md",
+      "text/markdown"
+    );
+  });
 }
 
 function renderComparison(baseline, candidate, comparison, plan) {
@@ -293,8 +364,18 @@ function hogRow(segment) {
   return `<tr><td><strong title="${escapeAttribute(segment.id)}">${escapeHtml(segment.id)}</strong>${escapeHtml(segment.type)}</td><td>${formatNumber(segment.tokens)}</td><td>${formatNumber(segment.replayTokens)}</td><td><span class="score-pill severity ${escapeHtml(segment.hogSeverity)}">${segment.effectiveHogScore.toFixed(1)}</span></td><td>${escapeHtml(segment.scoreConfidence)}</td></tr>`;
 }
 
+function governanceRow(record) {
+  return `<tr><td><strong>${escapeHtml(record.segmentId)}</strong>${escapeHtml(record.sensitivity)}</td>`
+    + `<td><span class="score-pill severity ${record.retentionLock ? "high" : "low"}">${escapeHtml(record.authority)}</span></td>`
+    + `<td>${escapeHtml(record.allowedTransformations.join(", "))}</td></tr>`;
+}
+
+function camelToWords(value) {
+  return String(value).replace(/([A-Z])/g, " $1").toLowerCase().trim();
+}
+
 function planAction(action, index) {
-  return `<div class="plan-action"><span class="plan-index">${String((index ?? 0) + 1).padStart(2, "0")}</span><div><strong>${escapeHtml(action.action)} / ${escapeHtml(action.segmentId)}</strong><p>${escapeHtml(action.reason)}</p></div><span class="plan-save">-${formatNumber(action.currentTokenSavings)} now<br>-${formatNumber(action.futureReplayTokenSavings)} replay</span></div>`;
+  return `<div class="plan-action"><span class="plan-index">${String((index ?? 0) + 1).padStart(2, "0")}</span><div><strong>${escapeHtml(action.action)} / ${escapeHtml(action.segmentId)}</strong><p>${escapeHtml(action.reason)}</p><small class="plan-meta">${formatPercent(action.qualityRiskProbability)} chance quality holds &middot; value ${formatNumber(action.removableLoadValue)}</small></div><span class="plan-save">-${formatNumber(action.currentTokenSavings)} now<br>-${formatNumber(action.futureReplayTokenSavings)} replay</span></div>`;
 }
 
 function categoryClass(category) {
@@ -303,15 +384,27 @@ function categoryClass(category) {
 
 function downloadLastExport() {
   if (!lastExport) return;
-  const blob = new Blob([JSON.stringify(lastExport, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+  downloadText(
+    JSON.stringify(lastExport, null, 2),
+    mode === "compare" ? "pau-comparison.json" : "pau-context-receipt.json",
+    "application/json"
+  );
+}
+
+function downloadText(text, filename, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = mode === "compare" ? "pau-comparison.json" : "pau-context-receipt.json";
+  link.download = filename;
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function intervalLabel(interval) {
+  if (!interval || interval.sigma === 0) return "exact";
+  return `${formatNumber(interval.low)}-${formatNumber(interval.high)}`;
 }
 
 function showError(message) {

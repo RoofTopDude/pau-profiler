@@ -1,0 +1,116 @@
+{
+  "version": "0.2",
+  "runId": "swe-agent-run-7",
+  "model": "example-model",
+  "provider": "example",
+  "tokenizer": "harness-provided",
+  "traceBoundary": "final-provider-payload",
+  "contextWindow": 128000,
+  "analysisMode": "heuristic",
+  "turn": 9,
+  "segments": [
+    {
+      "id": "system.runtime-policy",
+      "type": "system",
+      "source": "harness.runtime",
+      "tokens": 6800,
+      "utility": 0.97,
+      "protected": true,
+      "turnAdded": 1,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "developer.repo-conventions",
+      "type": "developer",
+      "source": "workspace.policy",
+      "tokens": 4200,
+      "utility": 0.93,
+      "protected": true,
+      "turnAdded": 1,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "user.issue-1841",
+      "type": "user",
+      "source": "chat",
+      "tokens": 1250,
+      "utility": 1.0,
+      "protected": true,
+      "turnAdded": 1,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "history.turns-1-8",
+      "type": "history",
+      "source": "conversation",
+      "tokens": 16800,
+      "utility": 0.33,
+      "turnAdded": 1,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "tool.grep.symbol-search",
+      "type": "tool",
+      "source": "grep",
+      "tokens": 5200,
+      "utility": 0.12,
+      "relevance": 0.22,
+      "turnAdded": 2,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "tool.test-runner.full-output",
+      "type": "tool",
+      "source": "test-runner",
+      "tokens": 22400,
+      "utility": 0.16,
+      "relevance": 0.28,
+      "duplicateRatio": 0.52,
+      "turnAdded": 4,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "tool.ci.build-log",
+      "type": "tool",
+      "source": "ci",
+      "tokens": 11900,
+      "utility": 0.09,
+      "relevance": 0.2,
+      "duplicateRatio": 0.41,
+      "turnAdded": 7,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "code.auth-middleware",
+      "type": "code",
+      "source": "workspace.read",
+      "tokens": 4800,
+      "utility": 0.85,
+      "relevance": 0.94,
+      "density": 1.2,
+      "turnAdded": 3,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "code.session-store",
+      "type": "code",
+      "source": "workspace.read",
+      "tokens": 6300,
+      "utility": 0.77,
+      "relevance": 0.84,
+      "density": 1.15,
+      "turnAdded": 5,
+      "turnLastSeen": 9
+    },
+    {
+      "id": "summary.plan-state",
+      "type": "summary",
+      "source": "planner",
+      "tokens": 1900,
+      "utility": 0.86,
+      "density": 1.3,
+      "turnAdded": 8,
+      "turnLastSeen": 9
+    }
+  ]
+}

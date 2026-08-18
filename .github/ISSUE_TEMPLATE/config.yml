@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Specification questions
+    url: https://github.com/RoofTopDude/pau-profiler/blob/main/spec/PAU-SPEC.md
+    about: Read the PAU Core specification before proposing a change to scoring semantics.
+  - name: Security or privacy concern
+    url: https://github.com/RoofTopDude/pau-profiler/blob/main/SECURITY.md
+    about: Please follow the disclosure process instead of opening a public issue.

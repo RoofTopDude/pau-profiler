@@ -37,6 +37,8 @@ export interface WorkingSegment {
   pau: number;
   utilityEstimate: number | null;
   utilityMethod: UtilityMethod;
+  /** Combined log-space relative uncertainty for this segment's PAU value. */
+  sigma: number;
 }
 
 export function validateTrace(trace: PAUTrace): void {

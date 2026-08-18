@@ -7,7 +7,11 @@ export {
   browserProfile,
   profiles,
   profileFor,
-  getProfile
+  getProfile,
+  defineProfile,
+  describeProfile,
+  contextCategories,
+  baselineSegmentClass
 } from "./profile.js";
 export type { ProfileName } from "./profile.js";
 export { estimateTokens } from "./tokenizer.js";
@@ -16,6 +20,36 @@ export { findNearDuplicateMatches, normalizedText, textShingles, jaccard } from 
 export { getContextHogs } from "./policy.js";
 export { buildOptimizationPlan } from "./optimizer.js";
 export { evaluateBudget } from "./budget.js";
+export { estimateEvictablePAU, pigYield } from "./eviction.js";
+export {
+  gradeForSegment,
+  weakestGrade,
+  describeGrade,
+  reconcileTokens,
+  gradeDistribution
+} from "./accounting.js";
+export { computeInteractionIndex } from "./interaction.js";
+export {
+  buildGovernanceLedger,
+  isTransformationAllowed,
+  governanceFor
+} from "./governance.js";
+export { validatePAUTrace } from "./validate.js";
+export { renderReceiptMarkdown } from "./report.js";
+export {
+  defaultUncertaintyModel,
+  segmentInterval,
+  segmentSigma,
+  totalInterval
+} from "./uncertainty.js";
+export {
+  formatCompact,
+  formatCount,
+  formatInterval,
+  formatPercent,
+  formatSigned,
+  markdownTable
+} from "./format.js";
 export { compareReceipts } from "./compare.js";
 export { analyzeTraceSeries } from "./series.js";
 export {
@@ -26,6 +60,8 @@ export {
 } from "./adapters.js";
 export { toTelemetryAttributes, toSegmentTelemetryAttributes } from "./telemetry.js";
 export type { HogFilterOptions } from "./policy.js";
+export type { ReportOptions } from "./report.js";
+export type { SegmentUncertaintyInput } from "./uncertainty.js";
 export type { TelemetryAttributes } from "./telemetry.js";
 export type {
   AdjustmentBreakdown,
@@ -38,8 +74,16 @@ export type {
   CategorySummary,
   ContextCategory,
   ContextReceipt,
+  AuthorityClass,
   ContextSegmentInput,
+  DisclosureTier,
+  EffectScope,
   DuplicateMethod,
+  EvictionEstimate,
+  EvictionMethod,
+  GovernanceLedger,
+  GovernanceRecord,
+  InteractionIndex,
   HogSeverity,
   MetricDelta,
   NamedMetricDelta,
@@ -49,16 +93,27 @@ export type {
   OptimizationActionType,
   OptimizationPlan,
   OptimizationPolicyName,
+  PAUInterval,
   PAUProfile,
   PAUTrace,
+  ProfileManifest,
+  ProfileSpec,
+  ProfileStatus,
   ReceiptComparison,
   ReplayCountMethod,
   ScoreConfidence,
+  SensitivityClass,
   SourceSummary,
+  TokenAccountingGrade,
+  TokenReconciliation,
+  TransformationName,
   TokenCounter,
   TokenCountMethod,
   TraceFormat,
   TraceSeriesAnalysis,
   TraceSeriesPoint,
-  UtilityMethod
+  UncertaintyModel,
+  UtilityMethod,
+  ValidationIssue,
+  ValidationResult
 } from "./types.js";

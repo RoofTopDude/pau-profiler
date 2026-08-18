@@ -1,3 +1,7 @@
+import { describeGrade, gradeForSegment, reconcileTokens, weakestGrade } from "./accounting.js";
+import { estimateEvictablePAU } from "./eviction.js";
+import { buildGovernanceLedger } from "./governance.js";
+import { computeInteractionIndex } from "./interaction.js";
 import { fingerprint } from "./hash.js";
 import { round, safeRatio } from "./math.js";
 import { heuristicProfile, profileFor } from "./profile.js";
@@ -24,7 +28,14 @@ import {
   validateTrace,
   type WorkingSegment
 } from "./analysis-internals.js";
-import type { AnalyzeOptions, AnalyzedSegment, ContextReceipt, PAUTrace } from "./types.js";
+import { segmentInterval, segmentSigma, totalInterval } from "./uncertainty.js";
+import type {
+  AnalyzeOptions,
+  AnalyzedSegment,
+  ContextReceipt,
+  PAUInterval,
+  PAUTrace
+} from "./types.js";
 
 export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): ContextReceipt {
   validateTrace(trace);
@@ -76,7 +87,16 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
       adjustmentFactor,
       pau,
       utilityEstimate: utility.value,
-      utilityMethod: utility.method
+      utilityMethod: utility.method,
+      sigma: segmentSigma({
+        pau,
+        tokenCountMethod: counted.method,
+        utilityMethod: utility.method,
+        relevanceProvided: input.relevance !== undefined,
+        densityProvided: input.density !== undefined,
+        authorityProvided: input.authority !== undefined,
+        appliesFactors: profile.mode !== "basic"
+      }, profile.uncertainty)
     };
     if (contentHash !== undefined) result.contentHash = contentHash;
     if (duplicate.duplicateOf !== undefined) result.duplicateOf = duplicate.duplicateOf;
@@ -84,6 +104,8 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
   });
 
   const totalTokens = sum(working.map((segment) => segment.tokens));
+  const reconciliation = reconcileTokens(totalTokens, trace.providerTokenTotal);
+  const providerReconciled = reconciliation?.reconciled ?? false;
   const totalPAU = sum(working.map((segment) => segment.pau));
   const utilityMassTotal = sum(working.map((segment) =>
     segment.utilityEstimate === null ? 0 : segment.pau * segment.utilityEstimate
@@ -123,6 +145,7 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
       ...segment.input,
       tokens: segment.tokens,
       tokenCountMethod: segment.tokenCountMethod,
+      tokenAccountingGrade: gradeForSegment(segment.tokenCountMethod, providerReconciled),
       protected: segment.protected,
       duplicateRatio: round(segment.duplicateRatio),
       duplicateMethod: segment.duplicateMethod,
@@ -138,6 +161,7 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
         adjustmentFactor: round(segment.adjustmentFactor)
       },
       pau: round(segment.pau, 2),
+      pauInterval: roundInterval(segmentInterval(segment.pau, segment.sigma, profile.uncertainty)),
       pigDensity: round(segment.adjustmentFactor),
       replayTokens,
       replayPAU: round(replayPAU, 2),
@@ -172,15 +196,33 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
   const wastePAU = usefulPAU === null ? null : totalPAU - usefulPAU;
   const pigEfficiency = usefulPAU === null ? null : safeRatio(usefulPAU, totalPAU);
   const maxHogScore = segments.reduce((max, segment) => Math.max(max, segment.effectiveHogScore), 0);
+  const pauInterval = totalInterval(
+    working.map((segment) => ({ pau: segment.pau, sigma: segment.sigma })),
+    profile.uncertainty
+  );
+  const accountingGrade = weakestGrade(segments.map((segment) => segment.tokenAccountingGrade));
+  const pauUtilizationInterval = trace.contextWindow === undefined
+    ? null
+    : roundInterval({
+      low: safeRatio(pauInterval.low, trace.contextWindow),
+      high: safeRatio(pauInterval.high, trace.contextWindow),
+      sigma: pauInterval.sigma,
+      coverage: pauInterval.coverage
+    }, 4);
 
   const receipt: ContextReceipt = {
-    schemaVersion: "0.2",
+    schemaVersion: "0.3",
     profile: `${profile.id}@${profile.version}`,
     analysisMode: profile.mode,
     totalTokens,
     totalPAU: round(totalPAU, 2),
+    pauInterval: roundInterval(pauInterval),
+    tokenAccountingGrade: accountingGrade,
+    tokenAccountingNote: describeGrade(accountingGrade),
+    tokenReconciliation: reconciliation,
     rawUtilization: rawUtilization === null ? null : round(rawUtilization),
     pauUtilization: pauUtilization === null ? null : round(pauUtilization),
+    pauUtilizationInterval,
     duplicateTokenRatio: round(duplicateTokenRatio),
     replayTokens,
     replayPAU: round(replayPAU, 2),
@@ -198,6 +240,10 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
       replayOverheadRatio,
       segments
     ),
+    eviction: { ...placeholderEviction },
+    interaction: computeInteractionIndex(segments, rawUtilization, duplicateTokenRatio),
+    governance: buildGovernanceLedger(working, profile),
+    utilityEffectScope: trace.utilityEffectScope ?? "local",
     categories: summarizeCategories(segments, totalTokens, totalPAU),
     sources: summarizeSources(segments, totalTokens, totalPAU),
     warnings: buildWarnings(trace, segments, rawUtilization),
@@ -212,5 +258,30 @@ export function analyzeTrace(trace: PAUTrace, options: AnalyzeOptions = {}): Con
   if (trace.turn !== undefined) receipt.turn = trace.turn;
   if (trace.contextWindow !== undefined) receipt.contextWindow = trace.contextWindow;
 
+  // Eviction reads the finished receipt, so it is computed once the rest is assembled.
+  receipt.eviction = estimateEvictablePAU(receipt, options.evictionTolerance ?? 0.05);
+
   return receipt;
+}
+
+const placeholderEviction: ContextReceipt["eviction"] = {
+  tolerance: 0,
+  method: "structural",
+  evictablePAU: 0,
+  evictableTokens: 0,
+  evictableShare: 0,
+  pigEfficiency: 1,
+  estimatedQualityLoss: 0,
+  segmentIds: [],
+  protectedPAUExcluded: 0,
+  confidence: "low"
+};
+
+function roundInterval(interval: PAUInterval, digits = 2): PAUInterval {
+  return {
+    low: round(interval.low, digits),
+    high: round(interval.high, digits),
+    sigma: round(interval.sigma, 4),
+    coverage: interval.coverage
+  };
 }

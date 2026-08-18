@@ -195,9 +195,13 @@ function makeTrace(
   const traceBoundary = stringValue(source.traceBoundary);
   const contextWindow = numberValue(source.contextWindow ?? source.context_window);
   const turn = numberValue(source.turn);
+  const providerTokenTotal = numberValue(
+    source.providerTokenTotal ?? readUsageTokens(source.usage)
+  );
   if (runId !== undefined) inferred.runId = runId;
   if (model !== undefined) inferred.model = model;
   if (tokenizer !== undefined) inferred.tokenizer = tokenizer;
+  if (providerTokenTotal !== undefined) inferred.providerTokenTotal = providerTokenTotal;
   if (traceBoundary !== undefined) inferred.traceBoundary = traceBoundary;
   if (contextWindow !== undefined) inferred.contextWindow = contextWindow;
   if (turn !== undefined) inferred.turn = turn;
@@ -217,6 +221,8 @@ function assignTraceMetadata(
   const traceBoundary = options.traceBoundary ?? source.traceBoundary;
   const contextWindow = options.contextWindow ?? source.contextWindow;
   const turn = options.turn ?? source.turn;
+  const providerTokenTotal = options.providerTokenTotal ?? source.providerTokenTotal;
+  const utilityEffectScope = options.utilityEffectScope ?? source.utilityEffectScope;
 
   if (runId !== undefined) target.runId = runId;
   if (model !== undefined) target.model = model;
@@ -225,6 +231,15 @@ function assignTraceMetadata(
   if (traceBoundary !== undefined) target.traceBoundary = traceBoundary;
   if (contextWindow !== undefined) target.contextWindow = contextWindow;
   if (turn !== undefined) target.turn = turn;
+  if (providerTokenTotal !== undefined) target.providerTokenTotal = providerTokenTotal;
+  if (utilityEffectScope !== undefined) target.utilityEffectScope = utilityEffectScope;
+}
+
+/** Reads an input-token total from an OpenAI- or Anthropic-shaped usage block. */
+function readUsageTokens(usage: unknown): number | undefined {
+  if (!isRecord(usage)) return undefined;
+  const value = usage.prompt_tokens ?? usage.input_tokens;
+  return typeof value === "number" ? value : undefined;
 }
 
 function categoryForRole(role: string, isCurrentUser: boolean): ContextCategory {

@@ -1,48 +1,4 @@
+/* Entry point. Layer order matters: tokens and layout, then the profiler, then breakpoints. */
 @import url("./base.css");
 @import url("./profiler.css");
 @import url("./responsive.css");
-
-/* Context Pig brand mark: standalone transparent mascot, no container chrome. */
-.brand-mark {
-  display: flex !important;
-  width: 116px !important;
-  height: 116px !important;
-  flex: 0 0 116px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transform: none !important;
-  overflow: visible !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: -16px 0 !important;
-}
-.brand-mark span {
-  display: none !important;
-}
-.brand-logo {
-  display: block !important;
-  width: 116px !important;
-  height: 116px !important;
-  max-width: none !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-.header-inner {
-  min-height: 92px !important;
-}
-.brand {
-  gap: 14px !important;
-}
-.footer-brand .brand-mark,
-.footer-brand .brand-logo {
-  width: 116px !important;
-  height: 116px !important;
-  flex-basis: 116px !important;
-}

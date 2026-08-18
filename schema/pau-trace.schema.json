@@ -1,47 +1,99 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://rooftopdude.github.io/pau-profiler/schema/pau-trace-0.2.json",
-  "title": "PAU Context Trace 0.2",
+  "$id": "https://rooftopdude.github.io/pau-profiler/schema/pau-trace-0.3.json",
+  "title": "PAU Context Trace 0.3",
   "description": "Input trace for transparent context accounting with Pig Adjustable Units.",
   "type": "object",
-  "required": ["version", "segments"],
+  "required": [
+    "version",
+    "segments"
+  ],
   "properties": {
     "version": {
       "type": "string",
       "description": "Trace contract version. The reference implementation accepts 0.1, 0.2, and forward-compatible strings."
     },
-    "runId": { "type": "string" },
-    "model": { "type": "string" },
-    "provider": { "type": "string" },
-    "tokenizer": { "type": "string" },
+    "runId": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "tokenizer": {
+      "type": "string"
+    },
     "traceBoundary": {
       "type": "string",
       "description": "What the trace represents, for example final-provider-payload or pre-compaction-context."
     },
-    "contextWindow": { "type": "number", "exclusiveMinimum": 0 },
-    "turn": { "type": "integer", "minimum": 0 },
-    "analysisMode": { "enum": ["basic", "heuristic"] },
-    "metadata": { "$ref": "#/$defs/metadata" },
+    "contextWindow": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "turn": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "analysisMode": {
+      "enum": [
+        "basic",
+        "heuristic"
+      ]
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "providerTokenTotal": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Aggregate input tokens reported by the provider. When it reconciles with the sum of segment tokens, the trace earns accounting grade A and the unattributed remainder (chat template, tool schemas, protocol wrappers) is reported."
+    },
+    "utilityEffectScope": {
+      "enum": [
+        "local",
+        "run",
+        "policy"
+      ],
+      "description": "Causal scope that supplied utility values refer to. local: effect on this model call. run: total effect including changed downstream actions. policy: effect of a context-management policy over a task population. Defaults to local."
+    },
     "segments": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/segment" }
+      "items": {
+        "$ref": "#/$defs/segment"
+      }
     }
   },
   "additionalProperties": true,
   "$defs": {
     "metadataValue": {
-      "type": ["string", "number", "boolean", "null"]
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
     },
     "metadata": {
       "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/metadataValue" }
+      "additionalProperties": {
+        "$ref": "#/$defs/metadataValue"
+      }
     },
     "segment": {
       "type": "object",
-      "required": ["id", "type"],
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
         "type": {
           "enum": [
             "system",
@@ -59,26 +111,95 @@
             "other"
           ]
         },
-        "source": { "type": "string" },
-        "content": { "type": "string" },
-        "contentHash": { "type": "string" },
-        "tokens": { "type": "number", "minimum": 0 },
-        "turnAdded": { "type": "integer", "minimum": 0 },
-        "turnLastSeen": { "type": "integer", "minimum": 0 },
-        "replayCount": { "type": "integer", "minimum": 0 },
-        "duplicateRatio": { "type": "number", "minimum": 0, "maximum": 1 },
-        "relevance": { "type": "number", "minimum": 0 },
-        "density": { "type": "number", "minimum": 0 },
-        "authority": { "type": "number", "minimum": 0 },
-        "utility": { "type": "number", "minimum": 0, "maximum": 1 },
-        "protected": { "type": "boolean" },
-        "metadata": { "$ref": "#/$defs/metadata" }
+        "source": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "contentHash": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "turnAdded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "turnLastSeen": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replayCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicateRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "relevance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "density": {
+          "type": "number",
+          "minimum": 0
+        },
+        "authority": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Numeric measurement factor for obligation or priority. Distinct from authorityClass, which governs permitted transformations."
+        },
+        "utility": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "protected": {
+          "type": "boolean"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        },
+        "authorityClass": {
+          "enum": [
+            "mandatory-policy",
+            "application-instruction",
+            "current-user",
+            "advisory",
+            "untrusted-external"
+          ],
+          "description": "Governance classification, independent of the numeric authority measurement factor. Determines which transformations are permitted, and is never derived from a measured score."
+        },
+        "sensitivity": {
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "personal",
+            "regulated",
+            "secret"
+          ],
+          "description": "Sensitivity class used for storage, redaction, and disclosure decisions."
+        }
       },
       "allOf": [
         {
           "anyOf": [
-            { "required": ["tokens"] },
-            { "required": ["content"] }
+            {
+              "required": [
+                "tokens"
+              ]
+            },
+            {
+              "required": [
+                "content"
+              ]
+            }
           ]
         }
       ],

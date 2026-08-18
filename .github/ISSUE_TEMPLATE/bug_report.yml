@@ -1,0 +1,55 @@
+name: Bug report
+description: A measurement, CLI, library, or site behavior that is wrong or unclear.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste real prompts, source code, credentials, or customer data.
+        A PAU trace with only tokens, hashes, and provenance is usually enough to reproduce
+        a measurement problem.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Measurement (PAU, hog score, eviction, uncertainty)
+        - CLI
+        - Library API or types
+        - Adapters (OpenAI, Anthropic, messages)
+        - Website / browser profiler
+        - Documentation or specification
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect, and what happened instead?
+      description: For measurement issues, state which number looked wrong and why.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: A command, a minimal trace, or a code snippet.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `pau --version`, or the package version in use.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Node version and OS
+      placeholder: "Node 24.x, Windows 11"

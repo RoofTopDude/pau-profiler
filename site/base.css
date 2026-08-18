@@ -86,19 +86,26 @@ a { color: inherit; text-decoration: none; }
   background: rgba(9, 9, 11, 0.82);
   backdrop-filter: blur(18px) saturate(130%);
 }
-.header-inner { display: flex; min-height: 66px; align-items: center; gap: 28px; }
-.brand { display: inline-flex; align-items: center; gap: 11px; flex: 0 0 auto; }
+.header-inner { display: flex; min-height: 92px; align-items: center; gap: 28px; }
+.brand { display: inline-flex; align-items: center; gap: 14px; flex: 0 0 auto; }
+
+/* Context Pig mark: a standalone transparent mascot, deliberately without container chrome. */
 .brand-mark {
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  transform: rotate(45deg);
-  border: 1px solid var(--primary-border);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(96, 165, 250, 0.05));
-  box-shadow: inset 0 0 18px rgba(139, 92, 246, 0.1), 0 0 24px rgba(139, 92, 246, 0.08);
+  display: flex;
+  width: 104px;
+  height: 104px;
+  flex: 0 0 104px;
+  align-items: center;
+  justify-content: center;
+  margin: -14px 0;
 }
-.brand-mark span { transform: rotate(-45deg); color: var(--fg); font-family: var(--mono); font-size: 13px; font-weight: 800; }
+.brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
 .brand-copy { display: grid; line-height: 1; letter-spacing: 0.08em; }
 .brand-copy strong { color: var(--fg); font-size: 14px; }
 .brand-copy small { margin-top: 4px; color: var(--fg-4); font-family: var(--mono); font-size: 8px; letter-spacing: 0.24em; }

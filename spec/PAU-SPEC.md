@@ -1,8 +1,8 @@
-# PAU Core Specification 0.2
+# PAU Core Specification 0.3
 
 ## Status
 
-Experimental open specification. PAU 0.2 defines transparent context-accounting and diagnostic primitives for AI and agent systems. It does not claim that reference weights are universal measurements of model attention, cognition, or task value.
+Experimental open specification. PAU 0.3 defines transparent context-accounting and diagnostic primitives for AI and agent systems. It does not claim that reference weights are universal measurements of model attention, cognition, or task value.
 
 ## 1. Scope
 
@@ -21,7 +21,7 @@ PAU distinguishes four concerns:
 - **Context segment**: a provenance-preserving unit such as a policy block, user turn, tool result, retrieved document, source excerpt, memory item, or browser snapshot.
 - **Pig Adjustment Factor (`PAF`)**: the explicit multiplicative factor applied to a segment.
 - **Pig Adjustable Units (`PAU`)**: physical tokens multiplied by `PAF`.
-- **Pig Density**: PAU per physical token.
+- **Conditional Pig Density**: PAU per physical token. It is conditional because a weight depends on the active task, the surrounding context, duplication, position, and the model profile, rather than being an intrinsic property of the segment.
 - **Duplicate ratio (`d`)**: the fraction of a segment that repeats material already present in the same analyzed request.
 - **Replay count (`r`)**: the number of additional turns in which the segment has been carried after its initial insertion.
 - **Replay tokens**: `T * r`.
@@ -32,10 +32,15 @@ PAU distinguishes four concerns:
 - **Context Hog Index (`CHI`)**: a bounded 0-10 diagnostic comparing consumption share with utility share.
 - **Structural pressure**: a deterministic 0-10 score used when utility is unavailable.
 - **Context Receipt**: the machine-readable record of methods, factors, totals, warnings, scores, and provenance.
+- **Token Accounting Grade**: an A-D grade describing the evidence behind a token count.
+- **Governance ledger**: the record of authority, sensitivity, retention locks, and permitted transformations, computed independently of any measurement.
+- **CII**: Context Interaction/Interference Index, a dimensionless estimate of nonlocal contextual burden reported alongside PAU.
+- **Removable Load Value (RLV)**: expected savings weighted by the probability that quality stays within tolerance, by confidence, and by governance feasibility.
+- **Effect scope**: whether a utility claim refers to one call (`local`), a whole trajectory (`run`), or a policy over a task population (`policy`).
 
 ## 3. Context taxonomy
 
-PAU Core 0.2 defines these categories:
+PAU Core 0.3 defines these categories:
 
 ```text
 system, developer, user, history, tool, workspace, rag,
@@ -51,7 +56,7 @@ For segment `i`:
 ```text
 PAF_i = B_i * R_i * D_i * A_i
 PAU_i = T_i * PAF_i
-PigDensity_i = PAU_i / T_i
+ConditionalPigDensity_i = PAU_i / T_i
 ```
 
 Where:
@@ -89,6 +94,29 @@ Each segment MUST identify its token-count method:
 - `estimated` - deterministic approximation.
 
 Reports MUST NOT represent estimated counts as exact. A conforming implementation SHOULD include the tokenizer identity and declared trace boundary when known.
+
+### 5.1 Token Accounting Grade
+
+Requiring exact per-segment token counts states the right goal and the wrong requirement. Providers do not uniformly expose their hidden serialization, so a harness can seldom prove segment-level exactness. PAU 0.3 therefore grades the available evidence instead of asserting precision it cannot demonstrate.
+
+| Grade | Evidence | Interpretation |
+| --- | --- | --- |
+| `A` | Provider aggregate reconciles with harness segment attribution | Provider-verified accounting |
+| `B` | Exact counts from a declared local tokenizer and serialization | Exact for client-side serialization |
+| `C` | Provider-equivalent tokenizer estimate | Hidden template differences possible |
+| `D` | Approximate tokenizer or modality conversion | Approximate only |
+
+A trace grade MUST be the weakest grade among its segments. A comparison MUST NOT imply higher fidelity than the least reliable measurement it contains.
+
+### 5.2 Provider reconciliation
+
+Where the provider reports an aggregate input-token count, an implementation SHOULD record it as `providerTokenTotal` and report the reconciliation:
+
+```text
+UnattributedTokens = ProviderTotal - sum(T_i)
+```
+
+The remainder is the chat template, tool schemas, and protocol wrapping that the harness never saw. Reporting it keeps unattributed context visible rather than silently absorbed into segment totals.
 
 ## 6. Duplication
 
@@ -213,6 +241,21 @@ Reference classifications:
 
 A hog score identifies investigation priority. It MUST NOT be treated as autonomous deletion permission.
 
+### 11.1 CHI is a triage index, not a control law
+
+CHI places utility in the denominator. As positive utility approaches zero the ratio becomes unstable, so small evaluator perturbations produce large ranking changes — and that instability is worst precisely among the segments the index flags hardest.
+
+CHI therefore remains suitable for operator triage and MUST NOT be used on its own to authorize automated removal. For action selection, PAU 0.3 defines **Removable Load Value**:
+
+```text
+RLV_i(d) = ExpectedSavings_i
+         x P(quality loss <= d | evidence)
+         x Confidence_i
+         x ActionFeasibility_i
+```
+
+Utility appears in the numerator through the probability term, so the quantity stays bounded where a ratio diverges. `ActionFeasibility_i` is zero for any transformation the governance ledger forbids, irrespective of measured utility. Savings SHOULD remain multidimensional — tokens, PAU, latency, and cost — rather than collapsing infrastructure economics into PAU.
+
 ## 12. Score confidence
 
 The reference confidence starts at 1.0 and applies these reductions:
@@ -260,6 +303,54 @@ The reference profiles protect `system`, `developer`, and current `user` context
 
 Organizations SHOULD extend protection to safety policy, legal constraints, authorization state, current task requirements, and any context whose removal could violate operational controls.
 
+## 14a. Governance ledger
+
+PAU 0.3 keeps two ledgers and computes them independently.
+
+- The **measurement ledger** records tokens, PAU, replay, duplication, estimated utility, uncertainty, and interaction pressure. It answers what context cost and what it appeared to contribute.
+- The **governance ledger** records authority, mandatory status, sensitivity, retention locks, and permitted transformations. It answers what the system is obligated to preserve.
+
+They are combined only at the policy layer, and only in one direction: governance constrains action, and measurement never unlocks it.
+
+This separation exists because the two questions have different answers. A safety constraint that activates in one run out of a thousand will look worthless to any counterfactual evaluation over routine traffic. That is a fact about the traffic, not a licence to delete the constraint. Folding authority into the measured weight invites exactly that error, and creates a Goodhart target besides.
+
+An implementation MUST classify each segment into an authority class:
+
+| Authority class | Permitted transformations |
+| --- | --- |
+| `mandatory-policy` | `retain` |
+| `application-instruction` | `retain`, `reposition` |
+| `current-user` | `retain`, `reposition` |
+| `advisory` | all |
+| `untrusted-external` | all |
+
+A conforming optimizer MUST consult permitted transformations **before** any score is considered, so that no measurement can make a locked segment actionable. Retrieved documents and tool output MUST be classified as `untrusted-external` regardless of instruction-like content, and MUST NOT be promoted to a higher authority by their content or their score.
+
+## 14b. Context Interaction/Interference Index
+
+Segment PAU is additive by construction. Contextual burden is not: input length degrades performance on its own even where retrieval is controlled, and the distance between pieces of evidence that must be combined introduces further bias. Neither effect is a property of any single segment, so neither belongs in a per-segment multiplier.
+
+CII is therefore reported **alongside** PAU and MUST NOT be added to it:
+
+```text
+CII = f(occupancy, fragmentation, evidence spread,
+        instruction conflict, redundancy interference)
+```
+
+CII MUST be dimensionless and bounded to `[0,1]`. An implementation MUST NOT convert CII into token-equivalents: the evidence supports the existence of these effects, not a universal exchange rate between a spacing pattern and a token count. Every component MUST be reported so a reader can see which pressure drove the value.
+
+## 14c. Effect scope
+
+Utility is not a single causal quantity. An implementation MUST declare the scope a utility estimate refers to:
+
+| Scope | Intervention | Meaning |
+| --- | --- | --- |
+| `local` | Remove or replace a segment in one invocation | Effect on that model call |
+| `run` | Intervene and rerun the downstream trajectory | Total effect including changed actions |
+| `policy` | Compare context policies over a task population | Production decision effect |
+
+These can differ in magnitude and in sign. Context that barely affects one answer may change a tool selection that reshapes every later observation. An unlabeled utility number is ambiguous and MUST NOT be compared across scopes.
+
 ## 15. Optimization plans
 
 PAU optimization plans are advisory estimates. Valid action classes include:
@@ -306,7 +397,7 @@ A budget failure SHOULD identify the actual value, threshold, and violated metri
 
 ## 17. Context Receipt
 
-A 0.2 receipt MUST expose at minimum:
+A 0.3 receipt MUST expose at minimum:
 
 ```text
 schema and profile version
@@ -324,8 +415,26 @@ structural pressure / CHI / effective hog score
 score confidence
 category and source summaries
 Context Health Score
+token accounting grade and provider reconciliation when available
+PAU uncertainty interval and coverage
+governance ledger: authority, sensitivity, retention locks, permitted transformations
+Context Interaction/Interference Index and its components
+utility effect scope
+evictable PAU at the declared tolerance
 warnings and recommendations
 ```
+
+### 17.1 Disclosure tiers
+
+A receipt MAY be rendered at different disclosure levels from one analysis:
+
+| Audience | Discloses | Withholds |
+| --- | --- | --- |
+| End user | Aggregate composition, totals, whether memory/retrieval/tools were used, major omissions | Segment identifiers, source references, run identity |
+| Developer | Per-source and per-segment metrics, profile version, hog ranking, governance ledger, plan detail | Secrets and regulated payloads unless authorized |
+| Operator / auditor | The developer view plus uncertainty, measurement warnings, and full lineage | Content remains subject to least privilege |
+
+Tiering MUST be enforced by the renderer rather than left to the caller: an end-user surface must not be able to leak segment identifiers by passing the wrong options.
 
 The receipt is the transparency primitive. A user SHOULD be able to answer “why did this score change?” without access to a proprietary backend.
 
@@ -363,13 +472,24 @@ Results that differ on these dimensions SHOULD NOT be presented as directly comp
 
 ## 21. Conformance
 
-A **PAU Core 0.2 conforming analyzer**:
+A **PAU Core 0.3 conforming analyzer**:
 
 1. preserves physical token totals separately from PAU;
 2. exposes all adjustment factors;
 3. separates duplication from replay;
 4. labels token, duplicate, replay, and utility methods;
-5. emits a Context Receipt;
-6. protects configured policy-critical segments from automatic optimization;
-7. versions profiles and formulas;
-8. does not present heuristics as causal evidence.
+5. reports a Token Accounting Grade, and grades a trace by its weakest segment;
+6. maintains a governance ledger independent of measurement, and consults it before any score when selecting actions;
+7. reports CII separately from PAU and never adds it to the PAU total;
+8. declares the effect scope of every utility claim;
+9. reports an uncertainty interval or an ordinal confidence class;
+10. emits a Context Receipt;
+11. protects configured policy-critical segments from automatic optimization;
+12. versions profiles and formulas;
+13. does not present heuristics as causal evidence.
+
+### 21.1 Release gates
+
+The bar for observability use is lower than the bar for consequential use. PAU MUST NOT be used for billing, contractual service levels, or cross-system scorecards until it demonstrates independent reproducibility, cross-model and cross-domain calibration behavior, accounting-error characterization, uncertainty coverage, resistance to profile gaming, and controlled non-inferiority evidence.
+
+PAU makes no claim to metrological traceability. Its path to legitimacy is empirical reproducibility and measurement discipline, not analogy to a physical unit.

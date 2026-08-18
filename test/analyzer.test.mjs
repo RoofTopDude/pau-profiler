@@ -28,7 +28,7 @@ test("basic profile produces deterministic category-weighted PAU", () => {
     ]
   }, { profile: basicProfile });
 
-  assert.equal(receipt.schemaVersion, "0.2");
+  assert.equal(receipt.schemaVersion, "0.3");
   assert.equal(receipt.totalTokens, 200);
   assert.equal(receipt.totalPAU, 230);
   assert.equal(receipt.rawUtilization, 0.2);

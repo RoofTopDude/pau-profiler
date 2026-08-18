@@ -175,3 +175,57 @@ textarea:focus { background: #0b0b0f; box-shadow: inset 0 0 0 1px rgba(139, 92, 
 .footer-grid a { color: var(--fg-4); font-size: 10px; }
 .footer-grid a:hover { color: var(--fg); }
 
+/* Evictable-load panel: the "what could safely go" answer sits next to the plan. */
+.eviction-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.eviction-summary div {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.eviction-summary small {
+  color: var(--fg-4);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+.eviction-summary strong { color: var(--fg); font-size: 19px; letter-spacing: -0.02em; }
+.eviction-summary span { color: var(--fg-3); font-size: 11px; }
+.eviction-candidate {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--amber);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  word-break: break-all;
+}
+.eviction-note {
+  margin-top: 12px;
+  color: var(--fg-4);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .eviction-summary { grid-template-columns: 1fr; }
+}
+
+.kpi-card.grade strong { font-family: var(--mono); }
+.plan-meta {
+  display: block;
+  margin-top: 6px;
+  color: var(--fg-4);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}

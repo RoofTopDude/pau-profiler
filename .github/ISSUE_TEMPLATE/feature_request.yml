@@ -1,0 +1,40 @@
+name: Feature or measurement proposal
+description: Propose a capability, metric, profile, or adapter.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What context problem does this solve?
+      description: Describe the harness situation that is currently hard to measure or fix.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+
+  - type: dropdown
+    id: evidence
+    attributes:
+      label: If this proposes a new metric, how would it be justified?
+      options:
+        - Deterministic - computed directly from the trace
+        - Heuristic - explicitly labeled estimate
+        - Calibrated - derived from controlled ablation or evaluation
+        - Not a new metric
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Project constraints
+      options:
+        - label: This preserves local-first operation with no hidden network calls.
+          required: true
+        - label: This does not allow protected policy, safety, or user context to be auto-evicted.
+          required: true

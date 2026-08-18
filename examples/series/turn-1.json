@@ -1,0 +1,40 @@
+{
+  "version": "0.2",
+  "runId": "swe-agent-run-7",
+  "model": "example-model",
+  "provider": "example",
+  "tokenizer": "harness-provided",
+  "traceBoundary": "final-provider-payload",
+  "contextWindow": 128000,
+  "analysisMode": "heuristic",
+  "turn": 1,
+  "segments": [
+    {
+      "id": "system.runtime-policy",
+      "type": "system",
+      "source": "harness.runtime",
+      "tokens": 6800,
+      "utility": 0.97,
+      "protected": true,
+      "turnAdded": 1
+    },
+    {
+      "id": "developer.repo-conventions",
+      "type": "developer",
+      "source": "workspace.policy",
+      "tokens": 4200,
+      "utility": 0.93,
+      "protected": true,
+      "turnAdded": 1
+    },
+    {
+      "id": "user.issue-1841",
+      "type": "user",
+      "source": "chat",
+      "tokens": 1250,
+      "utility": 1.0,
+      "protected": true,
+      "turnAdded": 1
+    }
+  ]
+}

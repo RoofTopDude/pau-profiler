@@ -1,7 +1,7 @@
 {
   "name": "pau-profiler",
-  "version": "0.2.0",
-  "description": "Local-first context utilization analysis, Context Hog detection, trace comparison, optimization planning, and budget enforcement using Pig Adjustable Units (PAU).",
+  "version": "0.3.0",
+  "description": "Local-first context utilization analysis for AI agents: Context Hog detection, uncertainty intervals, evictable-load estimation, trace comparison, optimization planning, and CI budget enforcement using Pig Adjustable Units (PAU).",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +19,9 @@
     "bin",
     "schema",
     "spec",
+    "examples",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
@@ -28,6 +30,8 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test test/*.test.mjs",
     "example": "npm run build && node bin/pau.mjs analyze examples/research-agent.json",
+    "example:series": "npm run build && node bin/pau.mjs series examples/series/turn-1.json examples/series/turn-2.json examples/series/turn-3.json examples/series/turn-4.json",
+    "example:report": "npm run build && node bin/pau.mjs report examples/research-agent.json --tier developer",
     "prepack": "npm run build",
     "prepare": "npm run build"
   },
@@ -48,7 +52,11 @@
     "telemetry",
     "open-source",
     "prompt-engineering",
-    "agent-harness"
+    "agent-harness",
+    "context-engineering",
+    "cli",
+    "observability",
+    "opentelemetry"
   ],
   "license": "MIT",
   "sideEffects": false,

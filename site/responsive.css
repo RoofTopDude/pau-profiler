@@ -60,3 +60,8 @@
   .hero-instrument.reveal { animation-delay: 0.08s; }
   @keyframes enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 }
+
+@media (max-width: 640px) {
+  .header-inner { min-height: 68px; }
+  .brand-mark { width: 66px; height: 66px; flex-basis: 66px; margin: -8px 0; }
+}

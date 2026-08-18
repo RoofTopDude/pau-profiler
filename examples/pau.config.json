@@ -1,0 +1,13 @@
+{
+  "profile": "coding",
+  "contextWindow": 128000,
+  "policy": "balanced",
+  "tier": "developer",
+  "evictionTolerance": 0.05,
+  "budget": {
+    "maxRawUtilization": 0.8,
+    "maxReplayOverheadRatio": 0.35,
+    "maxHogScore": 8,
+    "minContextHealthScore": 55
+  }
+}
